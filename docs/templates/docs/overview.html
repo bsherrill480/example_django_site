@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello</title>
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    <style type="text/css">
+        {# Stolen from slack and modified #}
+        .code {
+            padding: 2px 4px;
+            color: #d14;
+            background-color: #f7f7f9;
+            border: 1px solid #e1e1e8;
+            white-space: nowrap;
+        }
+        .code {
+            font-family: Consolas,monaco,"Ubuntu Mono",courier,monospace!important;
+            font-size: .75em;
+            line-height: .75rem;
+            white-space: normal;
+            color: #C25;
+            padding: 2px 3px 1px;
+            -webkit-font-variant-ligatures: none;
+            font-variant-ligatures: none;
+            tab-size: 4;
+            -moz-tab-size: 4;
+            -o-tab-size: 4;
+            -webkit-tab-size: 4;
+        }
+    </style>
+</head>
+<body>
+<h1>
+    Black Rabbit's Project
+</h1>
+<hr>
+<p>
+    We approached this project by attempting to be RESTful with our endpoints.
+    For the most part, you can expect us to follow this pattern
+    <a href="https://en.wikipedia.org/wiki/Representational_state_transfer#Relationship_between_URL_and_HTTP_methods">
+        As found on Wikipedia.
+    </a>
+</p>
+<p>
+    All our endpoints are listed on our swagger. It will only list endpoints that you (the
+    current user) have access to, so make sure to login as a user.
+    <a href="/swagger/">You can view our swagger here</a>.
+</p>
+<h2>Authentication</h2>
+<p>
+    Authentication can be done with a token. To get a token for a user, make a request to the
+    <a href="/swagger/#/api-token-auth">api-token-auth endpoint</a> with username and password in
+    the body. To make an authenticated request, include the token as a header. E.g. if your token
+    is <span class="code">9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b</span>, then in your header
+    you would do:
+</p>
+<pre>Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b</pre>
+<h2>Overview</h2>
+<p>
+    Our app is broken up into 5 main parts:
+</p>
+<ul>
+    <li><a href="#users">Users</a></li>
+    <li><a href="#groups">Groups</a></li>
+    <li><a href="#posts">Posts</a></li>
+    <li><a href="#feed">Feed</a></li>
+</ul>
+<p>
+    For the most part, our app can be understood by looking at swagger, however we'll describe
+    anything we think is noteworth below.
+</p>
+<h3 id="users">Users</h3>
+<p>
+    Friendships fall under this category. We consider two users friends, if they have a "friendship"
+    going both ways. For example consider user A and user B. A and B are friends if and only if
+    there exist a friendship A->B and B->A. To make this more clear, in our endpoints we refer to
+    this as mutual friends. You can see your mutual friends with
+    <a href="/swagger/#!/api/user_friendship_mutual_read">this endpoint</a> , and your pending
+    friendships at <a href="/swagger/#!/api/user_friendship_pending_list">this endpoint</a>
+</p>
+<h3 id="groups">Groups</h3>
+Groups are a collection of people and an owner. They are used so that the owner may
+make "post" to everyone in the group's feed. Moreover, only the owner of group is allowed to modify
+the group and make posts, other group members don't have the access to do so.
+<h3 id="posts">Posts</h3>
+A user can make a post and edit a post with these endpoints. When making a post, either a
+group_id is passed or a user_id is passed, and that post will then appear in that user's feed.
+Post only supports text content at current stage, but it could be easily extend to other type of contents.
+<h3 id="feed">Feed</h3>
+A feed is basically a collection of posts, it has an one to one relationship with a user.
+To be more specific, a user's feed is a collection of "feeditem". When a post is created,
+a feeditem is created correspondingly to connect the post and the feed.
+</body>
+</html>
