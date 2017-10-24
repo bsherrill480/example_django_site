@@ -4,3 +4,4 @@
 staticfiles
 .env
 venv
+htmlcov
