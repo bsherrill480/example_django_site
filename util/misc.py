@@ -16,4 +16,3 @@ class _CounterStr(_Counter):
 
 def get_unique_str_fn():
     return _CounterStr()
-

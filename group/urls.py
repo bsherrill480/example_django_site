@@ -3,11 +3,11 @@ from group import views
 from rest_framework.routers import DefaultRouter
 
 
-router = DefaultRouter()
-router.register(r'group', views.GroupViewSet, base_name='group')
-router.register(r'groupMember', views.GroupMemberViewSet, base_name='groupmember')
+ROUTER = DefaultRouter()
+ROUTER.register(r'group', views.GroupViewSet, base_name='group')
+ROUTER.register(r'groupMember', views.GroupMemberViewSet, base_name='groupmember')
 
 
 urlpatterns = [
-    url(r'^', include(router.urls)),
+    url(r'^', include(ROUTER.urls)),
 ]

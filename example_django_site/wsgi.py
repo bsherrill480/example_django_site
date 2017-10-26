@@ -14,5 +14,6 @@ from whitenoise.django import DjangoWhiteNoise
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "example_django_site.settings")
 
+# pylint: disable=invalid-name
 application = get_wsgi_application()
 application = DjangoWhiteNoise(application)

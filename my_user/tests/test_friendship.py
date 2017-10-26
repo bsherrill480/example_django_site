@@ -26,12 +26,12 @@ class FriendshipTestCase(TestCase):
 
 class FriendshipManagerTestCase(FriendshipTestCase):
     def get_pending_friendships(self, user):
-        pending_friendships_raw = Friendship.objects.get_pending_friendships_for_user(user)
+        pending_friendships_raw = Friendship.objects.get_pending_friendships(user)
         pending_friendships = [i for i in pending_friendships_raw]
         return pending_friendships
 
     def get_mutual_friendships(self, user):
-        pending_friendships_raw = Friendship.objects.get_mutual_friendships_for_user(user)
+        pending_friendships_raw = Friendship.objects.get_mutual_friendships(user)
         pending_friendships = [i for i in pending_friendships_raw]
         return pending_friendships
 

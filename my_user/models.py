@@ -22,7 +22,7 @@ class User(Master, AbstractUser):
 class FriendshipManager(SafeDeleteManager, models.Manager):
     # returns friendships where the user does not have a reciprocating friendship,
     # i.e. "pending approval"
-    def get_pending_friendships_for_user(self, user):
+    def get_pending_friendships(self, user):
         user_id = user.id if isinstance(user, User) else user
         translations = {
             'f1.creator_id': 'creator',
@@ -39,7 +39,7 @@ class FriendshipManager(SafeDeleteManager, models.Manager):
         return raw_qs
 
     # returns friendships where the user does has a reciprocating friendship, i.e. they are friends
-    def get_mutual_friendships_for_user(self, user):
+    def get_mutual_friendships(self, user):
         user_id = user.id if isinstance(user, User) else user
         translations = {
             'f1.creator_id': 'creator',
@@ -76,5 +76,6 @@ class Friendship(Master):
 # http://www.django-rest-framework.org/api-guide/authentication/#by-exposing-an-api-endpoint
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
+    # pylint: disable=unused-argument
     if created:
         Token.objects.create(user=instance)

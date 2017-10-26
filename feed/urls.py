@@ -8,7 +8,7 @@ from . import views
 
 def get_router():
     """
-    Create a router and register our viewsets with it.
+    Create feed router and register our viewsets with it.
     :return: rest_framework router
     """
     router = DefaultRouter()

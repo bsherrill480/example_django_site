@@ -18,6 +18,7 @@ class GroupMember(Master):
 
 @receiver(pre_softdelete, sender=Group)
 def delete_members_of_group(sender, instance, **kwargs):
+    # pylint: disable=unused-argument
     members = GroupMember.objects.filter(group=instance)
     for member in members:
         member.delete()

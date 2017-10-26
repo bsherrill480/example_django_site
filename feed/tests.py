@@ -1,20 +1,32 @@
+"""
+Tests for feed module.
+"""
 from django.urls import reverse
 from django.test import TestCase
 from rest_framework.test import APITestCase
 from rest_framework import status
-from .models import *
 from my_user.models import User
 from post.models import Post
+from .models import Feed, FeedItem
 
 
 class FeedModelTestCase(TestCase):
-    def test_feed_made_upon_user_creation(self):
+    """
+    Test Feed Model.
+    """
+    def test_feed_on_user_creation(self):
+        """
+        Test that a feed is made when a user is created.
+        """
         user = User.objects.create_user('test_user1', 'test_user1@email.com', 'password')
         feed_exists = Feed.objects.filter(user=user)
         self.assertTrue(feed_exists)
 
 
 class FeedItemTestCase(APITestCase):
+    """
+    Test FeedItem.
+    """
 
     def setUp(self):
         """
@@ -56,7 +68,7 @@ class FeedItemTestCase(APITestCase):
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_get_feeditem_with_valid_permission(self):
+    def test_get_feeditem_valid_permission(self):
         """
         To test that an user can only see its own feeditems.
         """
@@ -82,4 +94,3 @@ class FeedItemTestCase(APITestCase):
         url = reverse('api:feed:feed_item-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-

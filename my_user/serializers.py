@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from .models import User, Friendship
 from util import serializer_mixins as sm
-from django.db.utils import IntegrityError
+from .models import User, Friendship
 
 
 # Serializers define the API representation.
@@ -14,11 +13,12 @@ class UserSerializer(sm.WriteOnceMixin, serializers.ModelSerializer):
             'id': {'read_only': True}
         }
 
-    def validate_password(self, value):
+    @staticmethod
+    def validate_password(value):
         """
         Check the supplied password is valid
         """
-        if not len(value):
+        if not value:
             raise serializers.ValidationError("Password must have length greater than 0.")
         return value
 
@@ -69,4 +69,3 @@ class FriendshipSerializer(serializers.ModelSerializer):
             friendship = Friendship(creator=user, **validated_data)
             friendship.save()
         return friendship
-

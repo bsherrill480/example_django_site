@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import Post
 from my_user.models import User
 from group.models import Group
 from util.serializer_mixins import WriteOnceMixin
+from .models import Post
 
 
 class PostSerializer(WriteOnceMixin, serializers.ModelSerializer):
@@ -18,7 +18,8 @@ class PostSerializer(WriteOnceMixin, serializers.ModelSerializer):
             'owner': {'read_only': True}
         }
 
-    def _remove_view_fields_from_validated_data(self, validated_data):
+    @staticmethod
+    def _remove_view_fields_from_validated_data(validated_data):
         validated_data.pop('to_group_id', None)
         validated_data.pop('to_user_id', None)
 
@@ -43,8 +44,7 @@ class PostSerializer(WriteOnceMixin, serializers.ModelSerializer):
             if bool(to_user_id) == bool(to_group_id):
                 raise serializers.ValidationError("Must pass to_group_id XOR to_user_id")
             if to_group_id and not Group.objects.filter(pk=to_group_id).exists():
-                    raise serializers.ValidationError("Invalid group")
+                raise serializers.ValidationError("Invalid group")
             if to_user_id and not User.objects.filter(pk=to_user_id).exists():
-                    raise serializers.ValidationError("Invalid User")
+                raise serializers.ValidationError("Invalid User")
         return super(PostSerializer, self).validate(attrs)
-

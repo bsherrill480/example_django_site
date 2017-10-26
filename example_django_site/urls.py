@@ -15,12 +15,13 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.shortcuts import redirect
 from rest_framework.authtoken import views
 from rest_framework_swagger.views import get_swagger_view
-from django.shortcuts import redirect
 
 
 def redirect_to_docs(request):
+    # pylint: disable=unused-argument
     return redirect('docs:main_doc_view')
 
 urlpatterns = [

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from util.serializer_mixins import WriteOnceMixin
-from .models import *
+from .models import Group, GroupMember
 
 
 class GroupSerializer(serializers.ModelSerializer, WriteOnceMixin):

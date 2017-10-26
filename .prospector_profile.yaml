@@ -1,0 +1,15 @@
+inherits:
+    - strictness_high
+
+pylint:
+  options:
+    max-parents: 15
+    max-line-length: 100
+    good-names: i,j,k,ex,Run,_,pk
+
+pep8:
+  options:
+    max-line-length: 100
+
+uses:
+  - django

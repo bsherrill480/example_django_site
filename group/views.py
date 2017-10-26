@@ -1,8 +1,9 @@
-from .serializers import *
 from rest_framework import viewsets, mixins, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
+from .serializers import GroupMemberSerializer, GroupSerializer
+from .models import GroupMember, Group
 
 
 class CreateListDeleteViewSet(viewsets.GenericViewSet,
@@ -27,16 +28,19 @@ class GroupViewSet(viewsets.ModelViewSet):
     Returns a specified group if it exists and is owned by authenticated user.
 
     update:
-    Updates a group with specified data if owned by authenticated user. The group owner is read-only and will not be
+    Updates a group with specified data if owned by authenticated user.
+    The group owner is read-only and will not be
     updated if specified value is different than existing.
 
 
     partial_update:
-    Partially updates a group with specified data if owned by authenticated user. The group is read-only and will not
+    Partially updates a group with specified data if owned by authenticated user.
+    The group is read-only and will not
     be updated if specified value is different than existing.
 
     delete:
-    Deletes a specified group owned by authenticated user and all records of membership for this group.
+    Deletes a specified group owned by authenticated user and all records of membership for this
+    group.
 
     get_members_by_group:
     Gets list of all members of a group if authenticated user is group owner.
@@ -49,11 +53,11 @@ class GroupViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_superuser:
             return Group.objects.all()
-        else:
-            return Group.objects.filter(group_owner=self.request.user.id)
+        return Group.objects.filter(group_owner=self.request.user.id)
 
     @detail_route(url_path='members-by-group')
     def get_members_by_group(self, request, pk):
+        # pylint: disable=unused-argument
         group = Group.objects.get(pk=pk)
         if group.group_owner.id != self.request.user.id:
             response = Response(status=status.HTTP_404_NOT_FOUND)
@@ -89,11 +93,11 @@ class GroupMemberViewSet(CreateListDeleteViewSet):
     def get_list_queryset(self):
         if self.request.user.is_superuser:
             return GroupMember.objects.all()
-        else:
-            return GroupMember.objects.filter(user_id=self.request.user.id)
+        return GroupMember.objects.filter(user_id=self.request.user.id)
 
     # Override to allow correct behavior for list
     def list(self, request, *args, **kwargs):
+        # pylint: disable=unused-argument
         queryset = self.filter_queryset(self.get_list_queryset())
 
         page = self.paginate_queryset(queryset)
@@ -104,12 +108,12 @@ class GroupMemberViewSet(CreateListDeleteViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    # Use default permissions. Pulls all members of groups user is owner of or records where user is member
+    # Use default permissions. Pulls all members of groups user is owner of or
+    # records where user is member
     def get_queryset(self):
         if self.request.user.is_superuser:
             return GroupMember.objects.all()
-        else:
-            groups = Group.objects.filter(group_owner=self.request.user.id).only('id').all()
-            records_as_owner = GroupMember.objects.filter(group_id__in=groups)
-            records_as_member = GroupMember.objects.filter(user_id=self.request.user.id)
-            return (records_as_member | records_as_owner).distinct()
+        groups = Group.objects.filter(group_owner=self.request.user.id).only('id').all()
+        records_as_owner = GroupMember.objects.filter(group_id__in=groups)
+        records_as_member = GroupMember.objects.filter(user_id=self.request.user.id)
+        return (records_as_member | records_as_owner).distinct()

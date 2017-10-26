@@ -15,7 +15,7 @@ import dj_database_url
 
 PRODUCTION_ENV = 'production'
 
-django_env = os.environ.get('DJANGO_ENV', '')
+DJANGO_ENV = os.environ.get('DJANGO_ENV', '')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,7 +24,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ruv6@$5(0by$8ijej)w_9q)75yho$ip(-2udskzr%l_x1(ki3&'
+# When generating a django project, it provides a secret key
+# I have moved it to an environement variable.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'INSECURE-value-for-running-tests')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -89,7 +91,8 @@ WSGI_APPLICATION = 'example_django_site.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 DATABASES = dict()
 
-if django_env == PRODUCTION_ENV:
+if DJANGO_ENV == PRODUCTION_ENV:
+    # pylint: disable=invalid-name
     db_from_env = dj_database_url.config()
     DATABASES['default'] = dict(db_from_env)
 else:

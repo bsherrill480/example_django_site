@@ -1,7 +1,6 @@
 from rest_framework import viewsets, permissions, generics
 from .models import User, Friendship
 from .serializers import UserSerializer, FriendshipSerializer
-from util.permissions import NoDelete
 
 
 # ViewSets define the view behavior.
@@ -33,8 +32,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_superuser:
             return User.objects.all()
-        else:
-            return User.objects.filter(id=self.request.user.id)
+        return User.objects.filter(id=self.request.user.id)
 
     permission_classes = (permissions.AllowAny, )
     serializer_class = UserSerializer
@@ -49,7 +47,7 @@ class PendingFriendshipList(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Friendship.objects.get_pending_friendships_for_user(user)
+        return Friendship.objects.get_pending_friendships(user)
 
 
 class MutualFriendshipList(generics.ListAPIView):
@@ -62,7 +60,7 @@ class MutualFriendshipList(generics.ListAPIView):
 
     def get_queryset(self):
         user_id = self.kwargs['user']
-        return Friendship.objects.get_mutual_friendships_for_user(user_id)
+        return Friendship.objects.get_mutual_friendships(user_id)
 
 
 class FriendshipCreate(generics.CreateAPIView):
@@ -98,4 +96,3 @@ class FriendshipDetail(generics.DestroyAPIView):
         except Friendship.DoesNotExist:
             pass
         instance.delete()
-
