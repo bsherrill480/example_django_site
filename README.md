@@ -6,7 +6,7 @@
 - requirements.txt: required by Heroku AND used for tracking python packages used
 - manage.py: django file used for interacting with django
 - db.sqlite3: sqlite3 database for development locally.
-- Makefile:
+- Makefile: For reusable CLI commands. https://en.wikipedia.org/wiki/Makefile
 - example_django_site/: main "django app", entry for django. Has files like settings.py
 - docs/: "django app" with page basic documentation.
 - util/: Not a django app, just a utility folder for misc. reusable stuff.
