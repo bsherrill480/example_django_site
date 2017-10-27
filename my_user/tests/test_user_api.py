@@ -3,20 +3,11 @@ from ..models import User
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
-from .util import UserTestUtil
+from .util import UserTestUtil, AUserBUserMixin
 
 
-class UserTestCase(APITestCase):
-    def setUp(self):
-        super(UserTestCase, self).setUp()
-        self.a_user = UserTestUtil.create_user()
-        self.b_user = UserTestUtil.create_user()
-
-    def client_login_a_user(self):
-        self.client.login(
-            username=self.a_user.username,
-            password=UserTestUtil.DEFAULT_USER_PASSWORD
-        )
+class UserTestCase(AUserBUserMixin, APITestCase):
+    pass
 
 
 class UserCollectionTestCase(UserTestCase):

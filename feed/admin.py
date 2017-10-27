@@ -1,6 +1,3 @@
-"""
-admin config for feed module.
-"""
 from django.contrib import admin
 from .models import FeedItem, Feed
 

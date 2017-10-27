@@ -1,3 +1,6 @@
+from typing import Callable
+
+
 class _Counter:
     def __init__(self):
         self._count = 0
@@ -14,5 +17,14 @@ class _CounterStr(_Counter):
         return str(count)
 
 
-def get_unique_str_fn():
+def get_unique_str_fn() -> Callable[[], str]:
+    """
+    :return: Callable. Takes no arguments, returns a different string each call.
+    e.g.
+    c = get_unique_str_fn()
+    c()  # '1'
+    c()  # '2'
+    c()  # '3'
+    ...
+    """
     return _CounterStr()

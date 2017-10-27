@@ -4,6 +4,19 @@ from util.misc import get_unique_str_fn
 _unique_str_fn = get_unique_str_fn()
 
 
+class AUserBUserMixin:
+    def setUp(self):
+        super(AUserBUserMixin, self).setUp()
+        self.a_user = UserTestUtil.create_user()
+        self.b_user = UserTestUtil.create_user()
+
+    def client_login_a_user(self):
+        self.client.login(
+            username=self.a_user.username,
+            password=UserTestUtil.DEFAULT_USER_PASSWORD
+        )
+
+
 class UserTestUtil:
     DEFAULT_USER_PASSWORD = _unique_str_fn()
 

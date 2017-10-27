@@ -1,6 +1,3 @@
-"""
-Views for feed module.
-"""
 from rest_framework import viewsets, permissions
 from .models import FeedItem
 from .serializers import FeedItemSerializer

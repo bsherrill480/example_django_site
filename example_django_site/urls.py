@@ -20,8 +20,7 @@ from rest_framework.authtoken import views
 from rest_framework_swagger.views import get_swagger_view
 
 
-def redirect_to_docs(request):
-    # pylint: disable=unused-argument
+def redirect_to_docs(_):
     return redirect('docs:main_doc_view')
 
 urlpatterns = [
@@ -31,5 +30,5 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls')),
     url(r'^api-token-auth/', views.obtain_auth_token),
     url(r'swagger/', get_swagger_view()),
-    url('^$', redirect_to_docs),
+    url('^$', redirect_to_docs, name='home'),
 ]
