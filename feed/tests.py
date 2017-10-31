@@ -18,56 +18,45 @@ class FeedModelTestCase(TestCase):
         self.assertTrue(feed_exists)
 
 
+
 class FeedItemTestCase(AUserBUserMixin, APITestCase):
     def setUp(self):
         super(FeedItemTestCase, self).setUp()
-        self.feed1 = Feed.objects.get(user=self.a_user)
-        self.post_sample = Post.objects.create(owner=self.b_user, text='hello world')
-        self.feeditem1 = FeedItem.objects.create(feed=self.feed1, post=self.post_sample)
+        self.a_feed = Feed.objects.get(user=self.a_user)
+        self.post_1 = Post.objects.create(owner=self.b_user, text='hello world')
+        self.feeditem1 = FeedItem.objects.create(feed=self.a_feed, post=self.post_1)
+        self.post_2 = Post.objects.create(owner=self.b_user, text='hello world2')
+        self.feeditem2 = FeedItem.objects.create(feed=self.a_feed, post=self.post_2)
+
+    @staticmethod
+    def post_to_expected(post):
+        return {
+            'id': post.id,
+            'owner': post.owner.id,
+            'text': post.text
+        }
 
 
 class FeedItemCollectionTestCase(FeedItemTestCase):
     def test_create_feeditem(self):
         self.client_login_a_user()
         url = reverse('api:feed:feed-item-list')
-        data = {'feed': self.feed1.id, 'post': self.post_sample.id}
+        data = {'feed': self.a_feed.id, 'post': self.post_1.id}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
-class FeedItemElementTestCase(FeedItemTestCase):
-    def test_delete_feeditem(self):
+    def test_get_feeditems(self):
         self.client_login_a_user()
-        url = reverse('api:feed:feed-item-detail', kwargs={'pk': self.feeditem1.id})
-        data = {'feed': self.feed1.id, 'post': self.post_sample.id}
-        response = self.client.delete(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_update_feeditem(self):
-        self.client_login_a_user()
-        url = reverse('api:feed:feed-item-detail', kwargs={'pk': self.feeditem1.id})
-        data = {'feed': self.feed1.id, 'post': self.post_sample.id}
-        response = self.client.put(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_get_feeditem_valid_permission(self):
-        """
-        To test that an user can only see its own feeditems.
-        """
-        self.client_login_a_user()
-        url = reverse('api:feed:feed-item-detail', kwargs={'pk': self.feeditem1.id})
-        response = self.client.get(url)
+        url = reverse('api:feed:feed-item-list')
+        response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(1, FeedItem.objects.count())
-        self.assertEqual(response.data['feed'], self.feed1.id)
-        self.assertEqual(
-            response.data['post'],
-            {
-                'id': self.post_sample.id,
-                'owner': self.post_sample.owner.id,
-                'text': self.post_sample.text
-            }
-        )
+        self.assertEqual(len(response.data), 2)
+        expected_data = [
+            {'feed': self.a_feed.id, 'post': self.post_to_expected(self.post_1)},
+            {'feed': self.a_feed.id, 'post': self.post_to_expected(self.post_2)},
+        ]
+        data = response.json()
+        self.assertEqual(data, expected_data)
 
     def test_get_feeditem_with_invalid_permission(self):
         """
@@ -76,3 +65,28 @@ class FeedItemElementTestCase(FeedItemTestCase):
         url = reverse('api:feed:feed-item-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class FeedItemElementTestCase(FeedItemTestCase):
+    def test_delete_feeditem(self):
+        self.client_login_a_user()
+        url = reverse('api:feed:feed-item-detail', kwargs={'pk': self.feeditem1.id})
+        data = {'feed': self.a_feed.id, 'post': self.post_1.id}
+        response = self.client.delete(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_update_feeditem(self):
+        self.client_login_a_user()
+        url = reverse('api:feed:feed-item-detail', kwargs={'pk': self.feeditem1.id})
+        data = {'feed': self.a_feed.id, 'post': self.post_1.id}
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_get_feeditem(self):
+        self.client_login_a_user()
+        url = reverse('api:feed:feed-item-detail', kwargs={'pk': self.feeditem1.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['feed'], self.a_feed.id)
+        self.assertEqual(response.data['post'], self.post_to_expected(self.post_1))
+

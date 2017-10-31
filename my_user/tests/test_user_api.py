@@ -40,6 +40,15 @@ class UserCollectionTestCase(UserTestCase):
         self.assertEqual(user_b.email, 'b@b.com')
         self.assertTrue(user_b.check_password('b'))
 
+    def test_create_bad_pass(self):
+        url = reverse('api:user:user-list')
+        response = self.client.post(url, {
+            'username': 'b',
+            'password': '',
+            'email': 'b@b.com'
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, 'user-list-anon-200')
+
 
 class UserElementTestCase(UserTestCase):
     def test_retrieve_valid_permission(self):

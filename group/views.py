@@ -51,8 +51,6 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     # Use default permissions
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            return Group.objects.all()
         return Group.objects.filter(group_owner=self.request.user.id)
 
     @detail_route(url_path='members-by-group')
@@ -89,30 +87,9 @@ class GroupMemberViewSet(CreateListDeleteViewSet):
     serializer_class = GroupMemberSerializer
     permission_classes = (IsAuthenticated,)
 
-    # Modified QuerySet for List
-    def get_list_queryset(self):
-        if self.request.user.is_superuser:
-            return GroupMember.objects.all()
-        return GroupMember.objects.filter(user_id=self.request.user.id)
-
-    # Override to allow correct behavior for list
-    def list(self, request, *args, **kwargs):
-        # pylint: disable=unused-argument
-        queryset = self.filter_queryset(self.get_list_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
     # Use default permissions. Pulls all members of groups user is owner of or
     # records where user is member
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            return GroupMember.objects.all()
         groups = Group.objects.filter(group_owner=self.request.user.id).only('id').all()
         records_as_owner = GroupMember.objects.filter(group_id__in=groups)
         records_as_member = GroupMember.objects.filter(user_id=self.request.user.id)

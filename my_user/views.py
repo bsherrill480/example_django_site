@@ -30,8 +30,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     # This way, an authenticated user can only retrieve, modify or delete its own object.
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            return User.objects.all()
         return User.objects.filter(id=self.request.user.id)
 
     permission_classes = (permissions.AllowAny, )

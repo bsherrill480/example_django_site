@@ -6,24 +6,24 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from my_user.models import User
+from my_user.tests.util import AUserBUserMixin, UserTestUtil
 
 
 # Create your tests here.
 
-class GroupTestCase(APITestCase):
+class GroupTestCase(AUserBUserMixin, APITestCase):
     def setUp(self):
-        self.a_user = User.objects.create_user('name', 'name@name.com', 'password')
-        self.a_user.save()
-        self.client.login(username='name', password='password')
+        super(GroupTestCase, self).setUp()
+        # self.a_user = User.objects.create_user('name', 'name@name.com', 'password')
+        # self.a_user.save()
+        self.client_login_a_user()
+        # self.client.login(username='name', password='password')
         self.my_group = Group.objects.create(group_owner=self.a_user, name='family')
         self.my_group.save()
 
     @staticmethod
     def random_string():
-        result = ''
-        for i in range(7):
-            result += (random.choice(string.ascii_lowercase + string.digits))
-        return result
+        return ''.join((random.choice(string.ascii_lowercase + string.digits) for _ in range(7)))
 
     @staticmethod
     def add_users(user_count):
@@ -39,8 +39,7 @@ class GroupTestCase(APITestCase):
     # Submits a post api call
     def create_instance(self):
         url = reverse('api:group:group-list')
-        response = self.client.post(path=url, data=
-        {
+        response = self.client.post(path=url, data={
             'group_owner': self.a_user.id,
             'name': 'friends',
         })
@@ -73,13 +72,14 @@ class GroupTestCase(APITestCase):
     def test_get_list(self):
         response = self.get_list()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(2, Group.objects.count())
+        # self.assertEqual(2, Group.objects.count())
         my_group_2 = Group.objects.get(name='neighborhood')
-        ord_dict_list = response.data
-        for ord_dict in ord_dict_list:
-            self.assertEqual(self.a_user.id, ord_dict.get('group_owner'))
-            group_name = ord_dict.get('name')
-            self.assertTrue(group_name.__eq__(my_group_2.name) or group_name.__eq__(self.my_group.name))
+        data = response.json()
+        expected_data = [
+            {'id': self.my_group.id, 'group_owner': self.a_user.id, 'name': self.my_group.name},
+            {'id': my_group_2.id, 'group_owner': self.a_user.id, 'name': my_group_2.name}
+        ]
+        self.assertEqual(data, expected_data)
 
     # Verifies correctness of api get call on instance
     def test_get_instance(self):
@@ -96,7 +96,7 @@ class GroupTestCase(APITestCase):
                                                    'name': 'family'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ord_dict = response.data
-        self.assertTrue(ord_dict.get('name').__eq__('family'))
+        self.assertEqual(ord_dict['name'], 'family')
 
     # Verifies that read only field is not updated
     def update_read_only(self):
@@ -119,11 +119,11 @@ class GroupTestCase(APITestCase):
         response = self.client.patch(path=url, data={'name': 'family'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ord_dict = response.data
-        self.assertTrue(ord_dict.get('name').__eq__('family'))
+        self.assertEqual(ord_dict['name'], 'family')
 
     # Verifies no collection update
     def test_update_list_not_supported(self):
-        my_group_2 = Group(group_owner=User.objects.get(username='name'), name='co-workers')
+        my_group_2 = Group(group_owner=self.a_user, name='co-workers')
         my_group_2.save()
         url = reverse('api:group:group-list')
         response = self.client.put(path=url, data={'name': 'family'})
@@ -146,7 +146,7 @@ class GroupTestCase(APITestCase):
 
 class GroupMemberTestCase(GroupTestCase):
     def setUp(self):
-        super().setUp()
+        super(GroupMemberTestCase, self).setUp()
         self.my_group_member = GroupMember.objects.create(user=self.a_user, group=self.my_group)
         self.my_group_member.save()
 
@@ -155,8 +155,8 @@ class GroupMemberTestCase(GroupTestCase):
         response = self.client.get(url)
         a_dict = response.data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assertEqual(a_dict.get('user'), self.a_user.id)
-        self.assertEqual(a_dict.get('group'), self.my_group.id)
+        self.assertEqual(a_dict['user'], self.a_user.id)
+        self.assertEqual(a_dict['group'], self.my_group.id)
 
     def test_get_instance_unauthorized(self):
         self.client.logout()
@@ -195,14 +195,15 @@ class GroupMemberTestCase(GroupTestCase):
         user_list = GroupMemberTestCase.add_users(5)
         for user in user_list:
             GroupMember(user=user, group=self.my_group).save()
+        user_list = user_list + [self.a_user]
+        user_ids = [user.id for user in user_list]
         url = reverse('api:group:group-members-by-group', kwargs={'pk': self.my_group.id})
         response = self.client.get(url)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         dict_list = response.data
         self.assertEqual(6, len(dict_list))
         for dict_item in dict_list:
-            some_user = User.objects.get(pk=dict_item.get('user'))
-            self.assertTrue(some_user in user_list or some_user.__eq__(self.a_user))
+            self.assertTrue(dict_item['user'] in user_ids)
 
     def test_membership_unauthorized(self):
         self.client.logout()
@@ -212,6 +213,17 @@ class GroupMemberTestCase(GroupTestCase):
         url = reverse('api:group:group-members-by-group', kwargs={'pk': self.my_group.id})
         response = self.client.get(url)
         self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+    # test that the a user gets a 404 if they don't own the group
+    def test_membership_nonowner_404(self):
+        self.client.logout()
+        self.client.login(
+            username=self.b_user.username,
+            password=UserTestUtil.DEFAULT_USER_PASSWORD
+        )
+        url = reverse('api:group:group-members-by-group', kwargs={'pk': self.my_group.id})
+        response = self.client.get(url)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
     def test_delete_instance(self):
         url = reverse('api:group:groupmember-detail', kwargs={'pk': self.my_group_member.id})
@@ -226,7 +238,7 @@ class GroupMemberTestCase(GroupTestCase):
         url = reverse('api:group:groupmember-list')
         member_list = []
         for user in user_list:
-            coin_flip = random.randint(1, 1000) % 2 == 0
+            coin_flip = random.randint(0, 1)
             resp = self.client.post(path=url, data={
                 'user': user.id,
                 'group': self.my_group.id if coin_flip else another_group.id

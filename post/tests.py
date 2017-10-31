@@ -28,7 +28,7 @@ class PostTestCase(APITestCase):
         data = dict()
         data.update(additional_data)
         data.update(data_base)
-        response = self.client.post(url, data, format='json')
+        response = self.client.post(url, data)
         return response
 
     def default_login(self):
@@ -78,6 +78,23 @@ class ListPostTestCase(PostTestCase):
         response = self.make_list_post()
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(0, Post.objects.count())
+
+    def test_create_post_no_to(self):
+        self.default_login()
+        response = self.make_list_post({})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_post_invalid_to_group(self):
+        self.default_login()
+        jibberish_id = 15315413
+        response = self.make_list_post({'to_group_id': jibberish_id})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_post_invalid_to_user(self):
+        self.default_login()
+        jibberish_id = 15315413
+        response = self.make_list_post({'to_user_id': jibberish_id})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     # test list functionality
     def test_get_posts_by_user(self):

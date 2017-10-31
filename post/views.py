@@ -33,8 +33,6 @@ class PostViewSet(ModelViewSet):
     serializer_class = PostSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            return Post.objects.all()
         return Post.objects.filter(owner=self.request.user)
 
     permission_classes = (permissions.IsAuthenticated, )

@@ -15,9 +15,6 @@ class UserManager(SafeDeleteManager, DefaultUserManager):
 class User(Master, AbstractUser):
     objects = UserManager()
 
-    def __repr__(self):
-        return str(self.username)
-
 
 class FriendshipManager(SafeDeleteManager, models.Manager):
     # returns friendships where the user does not have a reciprocating friendship,
@@ -59,9 +56,6 @@ class FriendshipManager(SafeDeleteManager, models.Manager):
 class Friendship(Master):
     class Meta:
         unique_together = ('creator', 'friend')
-
-    def __repr__(self):
-        return '({} :: {}->{})'.format(self.id, self.creator, self.friend)
 
     objects = FriendshipManager()
 

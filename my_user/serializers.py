@@ -13,15 +13,6 @@ class UserSerializer(sm.WriteOnceMixin, serializers.ModelSerializer):
             'id': {'read_only': True}
         }
 
-    @staticmethod
-    def validate_password(value):
-        """
-        Check the supplied password is valid
-        """
-        if not value:
-            raise serializers.ValidationError("Password must have length greater than 0.")
-        return value
-
     def create(self, validated_data):
         """
         When creating a user, let django deal with the password (i.e. hashing, salting, ...)
