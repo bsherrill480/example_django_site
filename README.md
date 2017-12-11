@@ -1,3 +1,9 @@
+## Example Django site
+This was a project I made with my group. It's a backend for a facebook-esc site where each users
+have feeds, friends, and groups. It's not perfect, but I think it's a good example of a
+non-trivial but still simple in scope project hilighting how to use django and django rest
+framework.
+
 ### Directory Notes
 
 - runtime.txt: required by Heroku to know the python environment
