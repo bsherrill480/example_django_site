@@ -9,7 +9,7 @@ Django==1.11.1
 django-filter==1.0.3
 django-rest-swagger==2.1.2
 django-safedelete==0.4.1
-djangorestframework==3.6.3
+djangorestframework==3.11.2
 dodgy==0.1.9
 gunicorn==19.7.1
 idna==2.5
